@@ -1,3 +1,5 @@
+require 'spec_helper'
+
 describe Stupidedi::Writer::Claredi do
   using Stupidedi::Refinements
   include Definitions
