@@ -42,7 +42,7 @@ module Stupidedi
 
           .interchange, .functionalgr, .table, .loop > .label {
             font-weight: bold;
-            font-family: Optima, Trebuchet, sans-serif;
+            /* font-family: Optima, Trebuchet, sans-serif; */
           }
 
           .interchange, .functionalgr, .transaction {
@@ -82,12 +82,68 @@ module Stupidedi
 
           .segment {
             font-weight: normal;
-            font-family: 'Andale Mono', Monospace, monospace;
+            /* font-family: 'Andale Mono', Monospace, monospace; */
+            margin-bottom: 1em;
           }
 
           .segment .label:first-child { font-weight: bold; }
 
-          .trim { color: #bbb; display: inline; }
+          .segment .segment-details {
+              background-color: #fff1c9;
+              font-weight: bold;
+          }
+
+          .segment .element {
+              background-color: #fffcf2;
+          }
+
+          .functionalgr {
+              margin-bottom: .5em;
+          }
+
+
+          .element {
+            display: grid;
+            grid-template-columns: 3em 32em auto;
+            grid-template-rows: auto;
+            grid-template-areas: "el-id el-name el-value";
+            grid-column-gap: 1em;
+          }
+
+          .element span.id {
+            grid-area: el-id;
+          }
+
+          .element span.name {
+            grid-area: el-name;
+          }
+
+          .element span.value {
+            grid-area: el-value;
+          }
+
+          .segment-details {
+            display: grid;
+            grid-template-columns: 3em 32em auto;
+            grid-template-rows: auto;
+            grid-template-areas: "el-id el-name el-purpose";
+            grid-column-gap: 1em;
+          }
+
+          .segment-details span.id {
+            grid-area: el-id;
+          }
+
+          .segment-details span.name {
+            grid-area: el-name;
+          }
+
+          .segment-details span.purpose {
+            grid-area: el-purpose;
+            display: none;
+          }
+
+          .trim { color: #bbb; }
           .hide { display: none; }
 
           #form {
@@ -95,7 +151,7 @@ module Stupidedi
             padding:          3px;
             border:           1px solid #ccc;
             margin:           3px 3px 30px 3px;
-            font-family:      Optima, Trebuchet, sans-serif;
+            /* font-family:      Optima, Trebuchet, sans-serif; */
             background-color: #eee;
           }
         </style>
@@ -108,28 +164,48 @@ module Stupidedi
           if node.composite?
             tmp = StringIO.new
             node.children.each{|e| build(e, tmp) }
-            tmp.string.gsub!(%r{^(<span [^>]+>):}, "\\1*")
-            tmp.string.gsub!(%r{((?:<span [^<]+>:?</span>)+)$}, %Q(<em class="trim hide">\\1</em>))
+            # tmp.string.gsub!(%r{^(<span [^>]+>):}, "\\1*")
+            #tmp.string.gsub!(%r{((?:<span [^<]+>:?</span>)+)$}, %Q(<em class="trim hide">\\1</em>))
             out << tmp.string
-          elsif node.component?
-            out << %Q(<span class="label" title="#{node.definition.name}">:#{node.to_x12}</span>)
+          # elsif node.component?
+          #   out << %Q(<span class="label" title="#{node.definition.name}">:#{node.to_x12}</span>)l
           elsif node.repeated?
             tmp = StringIO.new
             node.children.each{|e| build(e, tmp) }
-            tmp.string.gsub!("*", "^")
+            # tmp.string.gsub!("*", "^")
             out << tmp.string
+          elsif node.separator?
+            # do nothing
           else
-            out << %Q(<span class="label" title="#{node.definition.name}">*#{node.to_x12}</span>)
+            trim_class = ""
+            if node.empty?
+              trim_class = "trim hide"
+            end
+
+            out << <<~HTML
+              <div class="element #{ trim_class }">
+                <span class="id">#{ node.definition.id }</span>
+                <span class="name">#{ node.definition.name }</span>
+                <span class="value">#{ node.to_s }</span>
+              </div>
+            HTML
           end
 
         elsif node.segment?
-          out << %Q(<div class="segment"><span class="label" title="#{node.definition.name}">)
-          out << node.definition.id
-          out << "</span>"
           tmp  = StringIO.new
           node.children.each{|e| build(e, tmp) }
-          tmp.string.gsub!(%r{((?:<span [^>]+>\*</span>)+)$}, %Q(<div class="trim hide">\\1</div>))
-          out << "#{tmp.string}~</div>\n"
+          # tmp.string.gsub!(%r{((?:<span [^>]+>\*</span>)+)$}, %Q(<div class="trim hide">\\1</div>))
+
+          out << <<~HTML
+            <div class="segment">
+              <div class="segment-details">
+                <span class="id">#{node.definition.id}</span>
+                <span class="name">#{node.definition.name}</span>
+                <span class="purpose">#{node.definition.purpose}</span>
+              </div>
+              #{tmp.string}
+            </div>
+          HTML
 
         elsif node.loop?
           if m = /^(\d\w+)(?: [:-])? (.+)$/.match(node.definition.id)
@@ -167,7 +243,7 @@ module Stupidedi
           out << "</div>\n"
 
         elsif node.transmission?
-          out << %Q(<label id="form"><input type="checkbox" id="hide" onchange="toggle()" checked/> Hide empty suffixes</label>)
+          out << %Q(<label id="form"><input type="checkbox" id="hide" onchange="toggle()" checked/> Hide empty fields</label>)
           out << %Q(<div class="transmission">\n)
           node.children.each{|c| build(c, out) }
           out << "</div>\n"
