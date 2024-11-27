@@ -104,7 +104,7 @@ module Stupidedi
 
           .element {
             display: grid;
-            grid-template-columns: 3em 32em auto;
+            grid-template-columns: 3em 20em auto;
             grid-template-rows: auto;
             grid-template-areas: "el-id el-name el-value";
             grid-column-gap: 1em;
@@ -124,7 +124,7 @@ module Stupidedi
 
           .segment-details {
             display: grid;
-            grid-template-columns: 3em 32em auto;
+            grid-template-columns: 3em 20em auto;
             grid-template-rows: auto;
             grid-template-areas: "el-id el-name el-purpose";
             grid-column-gap: 1em;
