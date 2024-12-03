@@ -38,11 +38,8 @@ module Stupidedi
       def style
         <<-CSS
         <style>
-          body { font-size: 0.75em; }
-
-          .interchange, .functionalgr, .table, .loop > .label {
+          .interchange, .functionalgr, .s-table, .loop > .label {
             font-weight: bold;
-            /* font-family: Optima, Trebuchet, sans-serif; */
           }
 
           .interchange, .functionalgr, .transaction {
@@ -59,15 +56,15 @@ module Stupidedi
             font-size: 1.5em;
           }
 
-          .table, .loop {
+          .s-table, .loop {
             margin-top:    0.5em;
             margin-bottom: 0.5em;
             margin-left:   0.5em;
           }
 
-          .table { margin-left: 1em; margin-bottom: 2em; }
+          .s-table { margin-left: 1em; margin-bottom: 2em; }
 
-          .table        > .label/*
+          .s-table        > .label/*
           .interchange  > .label,
           .functionalgr > .label*/ {
             font-size:     1.25em;
@@ -82,7 +79,6 @@ module Stupidedi
 
           .segment {
             font-weight: normal;
-            /* font-family: 'Andale Mono', Monospace, monospace; */
             margin-bottom: 1em;
           }
 
@@ -93,8 +89,13 @@ module Stupidedi
               font-weight: bold;
           }
 
+          .segment .segment-details span {
+            padding: 0.25em 0.5em;
+          }
+
           .segment .element {
               background-color: #fffcf2;
+            padding: 0em 0.5em;
           }
 
           .functionalgr {
@@ -151,7 +152,6 @@ module Stupidedi
             padding:          3px;
             border:           1px solid #ccc;
             margin:           3px 3px 30px 3px;
-            /* font-family:      Optima, Trebuchet, sans-serif; */
             background-color: #eee;
           }
         </style>
@@ -182,8 +182,13 @@ module Stupidedi
               trim_class = "trim hide"
             end
 
+            anchor = String.new
+            if node.definition.name == "Payer Claim Control Number"
+              anchor << "<a name='#{node.to_s}'></a>"
+            end
+
             out << <<~HTML
-              <div class="element #{ trim_class }">
+              <div class="element #{ trim_class }">#{ anchor }
                 <span class="id">#{ node.definition.id }</span>
                 <span class="name">#{ node.definition.name }</span>
                 <span class="value">#{ node.to_s }</span>
@@ -221,7 +226,7 @@ module Stupidedi
           out << "</div>\n"
 
         elsif node.table?
-          out << %Q(<div class="table"><div class="label">#{node.definition.id}</div>\n)
+          out << %Q(<div class="s-table"><div class="label">#{node.definition.id}</div>\n)
           node.children.each{|c| build(c, out) }
           out << "</div>\n"
 
